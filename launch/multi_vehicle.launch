@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="robot_namespace" default="uav"/>  
+  <arg name="simulation" default="true"/>
+  <arg name="fcu_url" value="/dev/ttyACM0:57600"       unless="$(arg simulation)"/>
+  <arg name="fcu_url" value="udp://:14540@localhost:14580" if="$(arg simulation)"/>
+  
+  <group ns="$(arg robot_namespace)">
+
+    <!-- Gazebo configuration -->  	
+    
+<!--     <node name="FlightStack" pkg="default_cfg_fkie" type="default_cfg" clear_params="true" output="screen">
+	    <param name="capability_group" value="/SYSTEM"/>
+	    <param name="package" value="capability_scout"/>
+	    <param name="launch_file" value="gazebo_multi_vehicle.launch"/>	    
+    </node>   -->  
+
+    <node name="Offboard" pkg="default_cfg_fkie" type="default_cfg" clear_params="true">
+      <param name="capability_group" value="/SYSTEM"/>
+      <param name="package" value="capability_multi"/>
+      <param name="launch_file" value="vehicle_arm.launch"/>      
+    </node>
+
+    <node name="Trajectory" pkg="default_cfg_fkie" type="default_cfg" clear_params="true">
+      <param name="capability_group" value="/SYSTEM"/>
+      <param name="package" value="capability_multi"/>
+      <param name="launch_file" value="multi_traj.launch"/>      
+    </node>        
+  </group>
+
+
+
+  <!-- Multimaster settings -->
+  <node pkg="master_discovery_fkie"
+        type="master_discovery"
+        name="master_discovery" clear_params="true"/>
+
+  <node pkg="master_sync_fkie"
+        type="master_sync"
+        name="master_sync" clear_params="true">
+    <rosparam param="ignore_topics">[
+      "/tf", "/tf_static"
+    ]
+    </rosparam>
+  </node>
+
+</launch>
